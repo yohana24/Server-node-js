@@ -6,7 +6,6 @@ const mysql = require('mysql2');                        // ===== للتعامل 
 const bcrypt = require('bcrypt');                       // =====   لتشفير الباسوردات =====
 const jwt = require('jsonwebtoken');                    // ===== بيظبط التوكين علشان ميبقاش فى حاجة غلط=====
 const rateLimit = require('express-rate-limit');        // =====   علشان نمنع محاولات تخمين الباسورد =====
-const https = require('https');                         // =====   امان =====
 const fs = require('fs');                               // =====   امان =====
 
 const app = express();
@@ -162,13 +161,9 @@ app.delete('/data/:id', authenticateToken, authorizeRole('admin'), (req, res) =>
     });
 });
 
-// ===== إعداد HTTPS =====
-const sslOptions = {
-    key: fs.readFileSync('./ssl/server.key'),
-    cert: fs.readFileSync('./ssl/server.cert')
-};
 
-// ===== تشغيل السيرفر HTTPS =====
-https.createServer(sslOptions, app).listen(3443, '0.0.0.0', () => {
-    console.log('HTTPS API running on port 3443');
+
+// ===== تشغيل السيرفر HTTP =====
+app.listen(3443, '0.0.0.0', () => {
+    console.log('HTTP server running on port 3443');
 });

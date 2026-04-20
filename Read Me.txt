@@ -1,0 +1,118 @@
+ ESP32 IoT Secure Server Project
+-----------------------------------------------------------------------
+ Overview
+
+This project is a secure IoT system that receives sensor data from an ESP32 device using MQTT, stores it in a MySQL database, and displays it in a web dashboard with authentication and role-based access control.
+-----------------------------------------------------------------------
+ Features
+ Secure Authentication using JWT
+ Role-based access (Admin / User)
+ Real-time data visualization (Chart.js)
+ HTTPS secure server
+ MQTT integration for IoT devices
+ Protection against:
+XSS attacks
+Brute-force login attempts
+Unauthorized access
+ Rate limiting for login requests
+-----------------------------------------------------------------------
+ Project Architecture
+
+ESP32 → MQTT → Node.js Server → MySQL Database → Dashboard UI
+-----------------------------------------------------------------------
+ Technologies Used
+Node.js (Express.js)
+MySQL
+MQTT Protocol
+JSON Web Token (JWT)
+bcrypt (password hashing)
+Chart.js (frontend charts)
+HTTPS (SSL)
+-----------------------------------------------------------------------
+ Authentication System
+Users must login to get a JWT token
+Token is stored in browser localStorage
+All protected routes require:
+Authorization: Bearer <token>
+-----------------------------------------------------------------------
+ Roles
+Role	Permissions
+user	View data
+admin	View + Delete data
+-----------------------------------------------------------------------
+
+ API Endpoints
+ Authentication
+
+ Register
+POST /register
+
+Body:
+
+{
+  "username": "user",
+  "password": "12345",
+  "role": "user"
+}
+-----------------------------------------------------------------------
+ Login
+POST /login
+
+Response:
+
+{
+  "token": "JWT_TOKEN"
+}
+-----------------------------------------------------------------------
+Data
+ Get Sensor Data
+GET /data
+
+Headers:
+
+Authorization: Bearer <token>
+-----------------------------------------------------------------------
+ Delete Data (Admin Only)
+DELETE /data/:id
+-----------------------------------------------------------------------
+ MQTT Integration
+Broker: mqtt://localhost:1883
+Topic:
+esp32/data
+Example Payload:
+temperature:25
+-----------------------------------------------------------------------
+ Security Measures
+Implemented
+JWT Authentication
+Password hashing (bcrypt)
+Rate limiting (5 login attempts / 15 min)
+Account lock after multiple failures
+Input validation for MQTT data
+Basic XSS filtering
+Role-based authorization
+-----------------------------------------------------------------------
+ Security Testing Included
+
+Project includes simulation of:
+
+XSS attack via MQTT payload
+ESP32 data sender
+-----------------------------------------------------------------------
+ Dashboard
+Displays sensor data in table
+Shows chart visualization
+Auto-refresh every 30 seconds
+Admin can delete records
+-----------------------------------------------------------------------
+ HTTPS Configuration
+Uses self-signed SSL certificate
+Runs on:
+https://localhost:3443
+-----------------------------------------------------------------------
+ How to Run
+1. Install dependencies
+npm install
+2. Start MySQL and MQTT Broker
+3. Run server
+node index.js

@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 const client = mqtt.connect('mqtt://localhost:1883');
 
 client.on('connect', () => {
-    console.log('Fake ESP32 connected');
+    console.log('ESP32 connected');
 
     setInterval(() => {
         const temp = Math.floor(Math.random() * 15) + 20;

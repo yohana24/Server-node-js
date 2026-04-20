@@ -58,9 +58,8 @@ canvas {
 <canvas id="chart"></canvas>
 
 <script>
-//بنجيب التوكن اللي اليوزر اخده لو مفيش ارجع على login  يا روح امك
 
-const API_URL = 'https://192.168.1.2:3443'; //  السيرفر 
+const API_URL = 'http://localhost:3443'; //  السيرفر 
 
 function parseJwt(token) {
     try { return JSON.parse(atob(token.split('.')[1])); }

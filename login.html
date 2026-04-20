@@ -33,7 +33,7 @@ async function login() {
     const messageEl = document.getElementById('message');
 // إرسال البيانات للسيرفر عبر API =====
     try {
-        const res = await fetch('https://192.168.1.2:3443/login', {             // ده بيبعت طلب للسيرفر يسأله: هل الاسم والباسورد صح
+        const res = await fetch('http://localhost:3443/login', {             // ده بيبعت طلب للسيرفر يسأله: هل الاسم والباسورد صح
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })

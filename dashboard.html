@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0; padding: 20px;
+    background: #1e1e2f;
+    color: #fff;
+    display: flex; flex-direction: column; align-items: center;
+}
+
+table {
+    border-collapse: collapse; width: 100%; max-width: 900px; margin-top: 20px;
+    border-radius: 15px; overflow: hidden;
+    background: rgba(40,40,60,0.6);
+}
+
+th, td { padding: 12px; text-align: center; }
+th { background: rgba(60,60,90,0.8); }
+
+button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #ff4d4d;
+    color: #fff;
+}
+
+canvas {
+    margin-top: 30px;
+    max-width: 900px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>ESP32 Sensor Data Dashboard</h2>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Value</th>
+<th>Time</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="dataTable"></tbody>
+</table>
+
+<canvas id="chart"></canvas>
+
+<script>
+//بنجيب التوكن اللي اليوزر اخده لو مفيش ارجع على login  يا روح امك
+
+const API_URL = 'https://192.168.1.2:3443'; //  السيرفر 
+
+function parseJwt(token) {
+    try { return JSON.parse(atob(token.split('.')[1])); }
+    catch(e){ return {}; }
+}
+
+async function loadData() {
+    const token = localStorage.getItem('token');
+
+    if(!token){
+        alert('Login required');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/data`, {
+            headers: { 'Authorization':'Bearer '+token }
+        });
+
+        if(!res.ok){
+            alert('Unauthorized');
+            return;
+        }
+
+        const data = await res.json();
+        const tbody = document.getElementById('dataTable');
+        tbody.innerHTML='';
+
+        const userRole = parseJwt(token).role;
+
+        let labels = [];
+        let values = [];
+//عرض البيانات في الجدول
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.value}</td>
+                <td>${new Date(item.created_at).toLocaleString()}</td>
+                <td>${userRole==='admin' ? `<button onclick="deleteData(${item.id})">Delete</button>` : ''}</td>
+            `;
+
+            tbody.appendChild(tr);
+
+            labels.push(item.id);
+            values.push(parseFloat(item.value));
+        });
+
+        drawChart(labels, values);
+
+    } catch (err) {
+        console.error(err);
+        alert('Server error');
+    }
+}
+//حذف البيانات (Admin فقط)
+async function deleteData(id){
+    const token = localStorage.getItem('token');
+
+    try {
+        const res = await fetch(`${API_URL}/data/${id}`, {
+            method:'DELETE',
+            headers:{ 'Authorization':'Bearer '+token }
+        });
+
+        if(res.ok) loadData();
+        else alert('Unauthorized');
+
+    } catch(err){
+        console.error(err);
+    }
+}
+//رسم الـ Chart
+let chart;
+
+function drawChart(labels, values){
+    const ctx = document.getElementById('chart').getContext('2d');
+
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets:[{
+                label:'Temperature',
+                data: values,
+                borderColor:'red',
+                backgroundColor:'rgba(255,0,0,0.2)',
+                fill:true
+            }]
+        }
+    });
+}
+//التحديث التلقائي
+setInterval(loadData, 30000);
+loadData();
+
+</script>
+
+</body>
+</html>

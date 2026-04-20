@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<style>
+body {
+    font-family: Arial; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+}
+.container { background: rgba(255,255,255,0.2); padding: 30px; border-radius: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+input, button { margin: 5px; padding: 10px; width: 220px; border-radius: 10px; border: none; }
+button { cursor: pointer; background: #4CAF50; color: white; }
+#message { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Login</h2>
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<div id="message"></div>
+</div>
+
+<script>
+    // نجيب البيانات من الـ Inputs =====
+
+async function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const messageEl = document.getElementById('message');
+// إرسال البيانات للسيرفر عبر API =====
+    try {
+        const res = await fetch('https://192.168.1.2:3443/login', {             // ده بيبعت طلب للسيرفر يسأله: هل الاسم والباسورد صح
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+});
+        const data = await res.json();                                          // استقبال الرد من السيرفر
+
+        if (res.ok) {
+            localStorage.setItem('token', data.token);
+            window.location.href = 'dashboard.html';
+        } else {
+            messageEl.style.color = 'red';
+            messageEl.innerText = data.error || 'Login failed';
+        }
+
+    } catch (err) {                                                             // لو السيرفر مش شغال، يطلع رسالة للمستخدم بدل ما الصفحة تلاج
+        messageEl.style.color = 'red';
+        messageEl.innerText = 'Server error';
+        console.error(err);
+    }
+}
+</script>
+
+</body>
+</html>
